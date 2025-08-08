@@ -1,0 +1,8 @@
+{
+  "discord_bot_token": "",
+  "server_id": "",
+  "channel_id": "",
+  "firebase_api_key": "",
+  "elevenlabs_api_key": "",
+  "other_env": {}
+}

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Welcome Fairy — Status</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body::before { background-image: url('{{ url_for('static', filename='images/main_bg.jpg') }}'); }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <main class="container">
+    <h1>Welcome Fairy is Online</h1>
+    <p class="muted">Service status: <strong class="{{ 'ok' if running else 'bad' }}">{{ 'RUNNING' if running else 'STOPPED' }}</strong></p>
+    <section class="card">
+      <h2>Quick Links</h2>
+      <p><a class="btn" href="/edit">Open Editor</a></p>
+      <p><a class="btn" href="/ping">Ping Endpoint</a></p>
+    </section>
+  </main>
+</body>
+</html>

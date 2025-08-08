@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Welcome Fairy — Editor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body::before { background-image: url('{{ url_for('static', filename='images/main_bg.jpg') }}'); }
+    textarea { width: 100%; min-height: 320px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+    pre.logs { white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; max-height: 360px; overflow: auto; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 1000px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <main class="container">
+    <header class="bar">
+      <h1>Welcome Fairy — Editor</h1>
+      <nav>
+        <a class="btn" href="/">Status</a>
+        <a class="btn" href="/logout">Logout</a>
+      </nav>
+    </header>
+
+    {% if message %}
+      <div class="banner">{{ message }}</div>
+    {% endif %}
+
+    <section class="grid">
+      <form method="post" class="card">
+        <h2>Config</h2>
+        <input type="hidden" name="action" value="save_config">
+        <div class="field">
+          <label>Discord Bot Token</label>
+          <input type="text" name="discord_bot_token" value="{{ cfg.get('discord_bot_token','') }}" placeholder="Bot token">
+        </div>
+        <div class="field">
+          <label>Server ID</label>
+          <input type="text" name="server_id" value="{{ cfg.get('server_id','') }}" placeholder="1387...">
+        </div>
+        <div class="field">
+          <label>Channel ID</label>
+          <input type="text" name="channel_id" value="{{ cfg.get('channel_id','') }}" placeholder="1401...">
+        </div>
+        <div class="field">
+          <label>Firebase API Key</label>
+          <input type="text" name="firebase_api_key" value="{{ cfg.get('firebase_api_key','') }}">
+        </div>
+        <div class="field">
+          <label>ElevenLabs API Key</label>
+          <input type="text" name="elevenlabs_api_key" value="{{ cfg.get('elevenlabs_api_key','') }}">
+        </div>
+        <div class="field">
+          <label>Other Env (JSON)</label>
+          <textarea name="other_env" rows="6" placeholder='{"KEY":"VALUE"}'>{{ cfg.get('other_env','') if cfg.get('other_env') is string else cfg.get('other_env') }}</textarea>
+        </div>
+        <div class="row">
+          <button class="btn" type="submit">Save Config</button>
+          {% if running %}
+            <button class="btn warn" name="action" value="stop_bot">Stop Bot</button>
+          {% else %}
+            <button class="btn" name="action" value="start_bot">Start Bot</button>
+          {% endif %}
+          <button class="btn" name="action" value="restart_bot">Restart Bot</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <h2>Live Console</h2>
+        <pre class="logs" id="logs">{{ log_text }}</pre>
+        <div class="row">
+          <button class="btn" onclick="refreshLogs(event)">Refresh Logs</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <form method="post" class="card">
+        <h2>Edit Code (bot_logic.py)</h2>
+        <input type="hidden" name="action" value="save_code">
+        <textarea name="code_text" rows="20">{{ current_code }}</textarea>
+        <div class="row">
+          <button class="btn" type="submit">Save & Restart</button>
+        </div>
+      </form>
+
+      <form method="post" enctype="multipart/form-data" class="card">
+        <h2>Upload Code (.py)</h2>
+        <input type="hidden" name="action" value="upload_code">
+        <div class="field">
+          <input type="file" name="code_file" accept=".py">
+        </div>
+        <div class="row">
+          <button class="btn" type="submit">Upload & Restart</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    async function refreshLogs(e){
+      e && e.preventDefault();
+      try{
+        const res = await fetch(window.location.href, { method: 'GET', headers: {'X-Logs':'1'} });
+        // Fallback: just reload the page to get fresh logs
+        window.location.reload();
+      }catch(err){
+        window.location.reload();
+      }
+    }
+  </script>
+</body>
+</html>

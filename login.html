@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Welcome Fairy — Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body::before { background-image: url('{{ url_for('static', filename='images/login_bg.jpg') }}'); }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <main class="container narrow">
+    <h1 class="title glow">Welcome Fairy</h1>
+    <form method="post" class="card">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" required placeholder="admin">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" required placeholder="••••••••••">
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash">
+            {% for category, msg in messages %}
+              <div class="flash-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      <button class="btn pulse" type="submit">Login</button>
+    </form>
+  </main>
+</body>
+</html>

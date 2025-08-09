@@ -1,6 +1,0 @@
-flask==3.0.3
-werkzeug==3.0.3
-watchdog==4.0.2
-gunicorn==21.2.4
-discord.py==2.4.0
-firbase.admin==6.5.0

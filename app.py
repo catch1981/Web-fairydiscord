@@ -1,32 +1,50 @@
-# app.py — minimal Render-friendly Discord bot + tiny web
-import os, threading
+import os, threading, logging
 from flask import Flask
-import discord
-from discord.ext import commands
 
-# ---------- CONFIG ----------
-TOKEN = os.getenv("DISCORD_TOKEN")  # set this in Render Environment
-PORT = int(os.getenv("PORT", "10000"))
-
-# ---------- WEB ----------
+# ---------- Flask ----------
 app = Flask(__name__)
-@app.get("/")
-def home(): return "Welcome Fairy is alive.", 200
-@app.get("/healthz")
-def healthz(): return "ok", 200
-def run_web(): app.run(host="0.0.0.0", port=PORT)
 
-# ---------- DISCORD ----------
-intents = discord.Intents.default()
-intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+@app.route("/")
+def index():
+    return "Welcome Fairy is alive."
 
-@bot.event
-async def on_ready():
-    print(f"✅ Logged in as {bot.user} (id: {bot.user.id})")
-    await bot.change_presence(activity=discord.Game(name="type !ping"))
+@app.route("/health")
+def health():
+    return ("OK", 200)
 
-@bot.command()
+# ---------- Discord bot (runs in a side thread) ----------
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+
+# lazy-import so the web boot never dies if discord.py isn't ready yet
+def _start_bot():
+    import discord
+    from discord.ext import commands
+
+    intents = discord.Intents.default()
+    intents.message_content = True  # make sure this is also enabled in the Dev Portal
+
+    bot = commands.Bot(command_prefix="!", intents=intents)
+
+    @bot.event
+    async def on_ready():
+        print(f"[discord] Logged in as {bot.user} (id: {bot.user.id})")
+
+    @bot.command()
+    async def ping(ctx):
+        await ctx.send("pong 🫡")
+
+    # run() blocks, so we run it here in this thread
+    try:
+        bot.run(DISCORD_TOKEN)
+    except Exception as e:
+        logging.exception("Discord bot crashed: %s", e)
+
+# spawn the bot thread once, at import time
+if DISCORD_TOKEN:
+    t = threading.Thread(target=_start_bot, name="discord-bot", daemon=True)
+    t.start()
+else:
+    print("[discord] No DISCORD_TOKEN set – bot will not start.")
 async def ping(ctx): await ctx.send("pong")
 
 def run_bot():
